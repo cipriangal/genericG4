@@ -17,6 +17,13 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
+find_package(ROOT REQUIRED)
+message(STATUS "Found Root ${ROOT_LIBRARY_DIR}")
+set( ROOT_INC "${ROOT_LIBRARY_DIR}/../include")
+message(STATUS "Found Root ${ROOT_INC}")
+include_directories(${ROOT_INC})
+link_directories(${ROOT_LIBRARY_DIR})
+
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
 # Setup include directory for this project
@@ -36,7 +43,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(exampleB1 exampleB1.cc ${sources} ${headers})
-target_link_libraries(exampleB1 ${Geant4_LIBRARIES})
+target_link_libraries(exampleB1 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

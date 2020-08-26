@@ -1,33 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-// $Id: B1SteppingAction.cc 74483 2013-10-09 13:37:06Z gcosmo $
-//
-/// \file B1SteppingAction.cc
-/// \brief Implementation of the B1SteppingAction class
-
 #include "B1SteppingAction.hh"
 #include "B1EventAction.hh"
 #include "B1DetectorConstruction.hh"
@@ -36,42 +6,61 @@
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
+#include "TFile.h"
+#include "TTree.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
 : G4UserSteppingAction(),
-  fEventAction(eventAction),
-  fScoringVolume(0)
-{}
+  fEventAction(eventAction)
+{
+  fout=new TFile("o_genG4.root","RECREATE");
+  t=new TTree("t","step output");
+  t->Branch("evNr",&evNr,"evNr/I");
+  t->Branch("x",&x,"x/D");
+  t->Branch("y",&y,"y/D");
+  t->Branch("z",&z,"z/D");
+  t->Branch("px",&px,"px/D");
+  t->Branch("py",&py,"py/D");
+  t->Branch("pz",&pz,"pz/D");
+  t->Branch("kE",&kE,"kE/D");
+
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1SteppingAction::~B1SteppingAction()
-{}
+{
+  t->Write();
+  fout->Close();
+  // delete t;
+  // delete fout;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
 
-  // get volume of the current step
-  G4LogicalVolume* volume 
-    = step->GetPreStepPoint()->GetTouchableHandle()
-      ->GetVolume()->GetLogicalVolume();
-      
-  // check if we are in scoring volume
-  if (volume != fScoringVolume) return;
+  G4StepPoint* prePoint   = step->GetPreStepPoint();
+  G4VPhysicalVolume* prePV= prePoint->GetPhysicalVolume();
 
-  // collect energy deposited in this step
-  G4double edepStep = step->GetTotalEnergyDeposit();
-  fEventAction->AddEdep(edepStep);  
+  if (!prePV) return;
+  if( !(prePV->GetName()).contains("target") ) return;
+  if( step->GetTrack()->GetParentID() !=0 ) return;
+
+
+  evNr = fEventAction->GetCurrentEvNr();
+  x = prePoint->GetPosition().getX();
+  y = prePoint->GetPosition().getY();
+  z = prePoint->GetPosition().getZ();
+  px = prePoint->GetMomentum().getX();
+  py = prePoint->GetMomentum().getY();
+  pz = prePoint->GetMomentum().getZ();
+  kE = prePoint->GetKineticEnergy();
+  //G4cout<<"asdf "<<prePV->GetName()<<" >> "<<x<<G4endl;
+  t->Fill();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
