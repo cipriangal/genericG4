@@ -42,6 +42,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
+add_definitions(-std=c++11)
 add_executable(exampleB1 exampleB1.cc ${sources} ${headers})
 target_link_libraries(exampleB1 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
@@ -52,7 +53,6 @@ target_link_libraries(exampleB1 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 #
 set(EXAMPLEB1_SCRIPTS
   exampleB1.in
-  exampleB1.out
   init_vis.mac
   run1.mac
   run2.mac

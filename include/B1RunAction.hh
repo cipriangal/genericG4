@@ -2,7 +2,6 @@
 #define B1RunAction_h 1
 
 #include "G4UserRunAction.hh"
-#include "G4Parameter.hh"
 #include "globals.hh"
 
 class G4Run;
