@@ -10,6 +10,7 @@
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4UserLimits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -57,11 +58,13 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
  
   G4Material* shape1_mat = nist->FindOrBuildMaterial("G4_Pb");
   G4Box* solid1 = new G4Box("solid1",                    //its name
-			    0.5*2*cm, 0.5*2*cm, 0.6*mm); //its size
+			    0.5*2*cm, 0.5*2*cm, 0.5*0.6*mm); //its size
   G4LogicalVolume* logic1 =
     new G4LogicalVolume(solid1,            //its solid
                         shape1_mat,             //its material
                         "logic1");         //its name
+
+  logic1->SetUserLimits(new G4UserLimits(0.01*mm));
 
   new G4PVPlacement(0,                       //no rotation
                     G4ThreeVector(0,0,0),

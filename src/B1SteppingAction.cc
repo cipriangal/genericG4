@@ -46,6 +46,8 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
   G4StepPoint* prePoint   = step->GetPreStepPoint();
   G4VPhysicalVolume* prePV= prePoint->GetPhysicalVolume();
 
+  //G4cout<<"name "<<prePV->GetName()<<" "<<prePoint->GetPosition().getZ()<<G4endl;
+
   if (!prePV) return;
   if( !(prePV->GetName()).contains("target") ) return;
   if( step->GetTrack()->GetParentID() !=0 ) return;
